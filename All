@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malla Interactiva - Contaduría Pública - lys</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #fdfdfe;
+        }
+        .cherry-red {
+            color: #8B0000;
+        }
+        .bg-cherry-red {
+            background-color: #8B0000;
+        }
+        .border-cherry-red {
+            border-color: #8B0000;
+        }
+
+        .semester-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        @media (min-width: 1920px) {
+            .semester-grid {
+                grid-template-columns: repeat(10, 1fr);
+            }
+        }
+        
+        .semester-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .semester-header {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .subject-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            position: relative;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .subject-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
+        }
+
+        .subject-card.locked {
+            background-color: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .subject-card.locked:hover {
+            transform: none;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+        }
+
+        .subject-card.completed {
+            background-color: #8B0000; /* Cherry Red */
+            color: white;
+            border-color: #7f1d1d;
+        }
+        .subject-card.completed::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            border-top: 2px solid rgba(255, 255, 255, 0.8);
+            transform: rotate(-8deg);
+            transform-origin: center;
+        }
+
+        .subject-card.available {
+            border: 2px solid #8B0000;
+        }
+        
+        .subject-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            line-height: 1.2;
+        }
+        .subject-details {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        .subject-card.completed .subject-details {
+            color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold">Malla Curricular Interactiva</h1>
+            <p class="text-xl text-gray-600 mt-2">Contaduría Pública - FaCES UC</p>
+            <div class="mt-4 text-lg font-semibold cherry-red tracking-widest">lys</div>
+        </header>
+
+        <div id="curriculum-grid" class="semester-grid">
+            <!-- Las columnas y materias se generarán dinámicamente con JavaScript -->
+        </div>
+
+        <footer class="text-center mt-12 text-sm text-gray-500">
+            <p>Haz clic en una materia para marcarla como cursada. Las materias se desbloquearán cuando cumplas con sus prerrequisitos.</p>
+            <p>Las materias con borde rojo cereza están disponibles para ser cursadas.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Definición completa del pensum de Contaduría Pública
+        const curriculum = [
+            // Semestre 1
+            { id: 1, name: 'Introducción a la Economía', code: 'CB-1102', semester: 1, credits: 3, prerequisites: [] },
+            { id: 2, name: 'Historia Contemporánea', code: 'CS-1101', semester: 1, credits: 3, prerequisites: [] },
+            { id: 3, name: 'Métodos de Investigación I', code: 'CB-1104', semester: 1, credits: 3, prerequisites: [] },
+            { id: 4, name: 'Introducción a la Matemática', code: 'CB-1103', semester: 1, credits: 4, prerequisites: [] },
+            { id: 5, name: 'Derecho Público', code: 'AC-2201', semester: 1, credits: 2, prerequisites: [] },
+
+            // Semestre 2
+            { id: 6, name: 'Fundamentos Económicos I', code: 'AC-2101', semester: 2, credits: 3, prerequisites: [1] },
+            { id: 7, name: 'Contabilidad I', code: 'AC-4101', semester: 2, credits: 4, prerequisites: [] },
+            { id: 8, name: 'Sociología de las Organizaciones', code: 'AC-2503', semester: 2, credits: 3, prerequisites: [] },
+            { id: 9, name: 'Matemática I', code: 'CB-2102', semester: 2, credits: 4, prerequisites: [4] },
+            { id: 10, name: 'Legislación Mercantil', code: 'AC-2203', semester: 2, credits: 3, prerequisites: [5] },
+
+            // Semestre 3
+            { id: 11, name: 'Fundamentos Económicos II', code: 'AG-Z102', semester: 3, credits: 3, prerequisites: [6] },
+            { id: 12, name: 'Contabilidad II', code: 'AC-4102', semester: 3, credits: 4, prerequisites: [7] },
+            { id: 13, name: 'Intro a la Teoría de la Organización', code: 'AC-5032', semester: 3, credits: 3, prerequisites: [8] },
+            { id: 14, name: 'Matemática II', code: 'AC-1101', semester: 3, credits: 3, prerequisites: [9] },
+            { id: 15, name: 'Legislación Laboral', code: 'AG-2207', semester: 3, credits: 2, prerequisites: [10] },
+
+            // Semestre 4
+            { id: 16, name: 'Recursos Económicos I', code: 'AC-2301', semester: 4, credits: 2, prerequisites: [11] },
+            { id: 17, name: 'Contabilidad III', code: 'AC-4103', semester: 4, credits: 4, prerequisites: [12] },
+            { id: 18, name: 'Comportamiento Organizacional', code: 'AC-5107', semester: 4, credits: 3, prerequisites: [13] },
+            { id: 19, name: 'Estadística I', code: 'AC-1204', semester: 4, credits: 3, prerequisites: [9] },
+            { id: 20, name: 'Cálculo Financiero', code: 'AC-1102', semester: 4, credits: 3, prerequisites: [14] },
+
+            // Semestre 5
+            { id: 21, name: 'Recursos Económicos II', code: 'AC-2302', semester: 5, credits: 2, prerequisites: [16] },
+            { id: 22, name: 'Contabilidad IV', code: 'CP-4104', semester: 5, credits: 4, prerequisites: [17] },
+            { id: 23, name: 'Métodos de Investigación II', code: 'CB-2101', semester: 5, credits: 2, prerequisites: [3] },
+            { id: 24, name: 'Estadística II', code: 'AC-1205', semester: 5, credits: 3, prerequisites: [19] },
+            { id: 25, name: 'Administración Pública', code: 'AC-5503', semester: 5, credits: 3, prerequisites: [] },
+
+            // Semestre 6
+            { id: 26, name: 'Contabilidad en Época de Inflación', code: 'CP-4201', semester: 6, credits: 3, prerequisites: [22] },
+            { id: 27, name: 'Contabilidad Gubernamental', code: 'CP-4301', semester: 6, credits: 2, prerequisites: [22] },
+            { id: 28, name: 'Contabilidad de Costos I', code: 'CP-4303', semester: 6, credits: 3, prerequisites: [22] },
+            { id: 29, name: 'Estadística III', code: 'AC-1206', semester: 6, credits: 3, prerequisites: [24] },
+            { id: 30, name: 'Principios de Computación', code: 'AC-3502', semester: 6, credits: 2, prerequisites: [] },
+
+            // Semestre 7
+            { id: 31, name: 'Instituciones Financieras', code: 'AG-2303', semester: 7, credits: 2, prerequisites: [20] },
+            { id: 32, name: 'Auditoría I', code: 'CP-3101', semester: 7, credits: 3, prerequisites: [26, 27] },
+            { id: 33, name: 'Contabilidad de Costos II', code: 'CP-4303', semester: 7, credits: 3, prerequisites: [28] },
+            { id: 34, name: 'Sistemas y Procedimientos', code: 'CP-3302', semester: 7, credits: 2, prerequisites: [30] },
+            { id: 35, name: 'Derecho Financiero y Tributario', code: 'AC-2208', semester: 7, credits: 2, prerequisites: [10] },
+
+            // Semestre 8
+            { id: 36, name: 'Problemas Socioeconómicos', code: 'AC-2501', semester: 8, credits: 3, prerequisites: [21] },
+            { id: 37, name: 'Auditoría II', code: 'CP-3103', semester: 8, credits: 4, prerequisites: [32] },
+            { id: 38, name: 'Contabilidad de Costos III', code: 'CP-4304', semester: 8, credits: 3, prerequisites: [33] },
+            { id: 39, name: 'Sistemas de Contabilidad', code: 'CP-3303', semester: 8, credits: 3, prerequisites: [34] },
+            { id: 40, name: 'Impuestos I', code: 'AC-5206', semester: 8, credits: 3, prerequisites: [35] },
+
+            // Semestre 9
+            { id: 41, name: 'Investigación Aplicada a la Contaduría', code: 'AC-2402', semester: 9, credits: 3, prerequisites: [23] },
+            { id: 42, name: 'Auditoría III', code: 'CP-3104', semester: 9, credits: 4, prerequisites: [37] },
+            { id: 43, name: 'Análisis de Estados Financieros', code: 'CP-3405', semester: 9, credits: 3, prerequisites: [26] },
+            { id: 44, name: 'Presupuesto de Empresas', code: 'AC-5302', semester: 9, credits: 3, prerequisites: [28, 38] },
+            { id: 45, name: 'Impuestos II', code: 'AC-5207', semester: 9, credits: 3, prerequisites: [40] },
+
+            // Semestre 10
+            { id: 46, name: 'Trabajo de Grado Contaduría', code: 'CP-2403', semester: 10, credits: 0, prerequisites: [41] },
+            { id: 47, name: 'ELECTIVA', code: 'ELECTIVA', semester: 10, credits: 2, prerequisites: [] }, // Simplificado, requiere 76 UCs
+            { id: 48, name: 'Problemática de la Contaduría en Vzla', code: 'CP-3102', semester: 10, credits: 2, prerequisites: [42, 43, 44, 45] },
+            { id: 49, name: 'ELECTIVA', code: 'ELECTIVA', semester: 10, credits: 2, prerequisites: [] }, // Simplificado, requiere 76 UCs
+        ];
+
+        // Estado de las materias completadas
+        let completedSubjects = new Set();
+
+        const gridContainer = document.getElementById('curriculum-grid');
+
+        function checkPrerequisites(subject) {
+            if (subject.prerequisites.length === 0) {
+                return true;
+            }
+            return subject.prerequisites.every(prereqId => completedSubjects.has(prereqId));
+        }
+
+        function renderGrid() {
+            gridContainer.innerHTML = ''; 
+
+            for (let i = 1; i <= 10; i++) {
+                const semesterColumn = document.createElement('div');
+                semesterColumn.className = 'semester-column';
+                semesterColumn.innerHTML = `<div class="semester-header">${i}</div>`;
+                
+                const subjectsInSemester = curriculum.filter(s => s.semester === i);
+
+                subjectsInSemester.forEach(subject => {
+                    const card = document.createElement('div');
+                    card.className = 'subject-card';
+                    card.dataset.id = subject.id;
+
+                    const isCompleted = completedSubjects.has(subject.id);
+                    const arePrereqsMet = checkPrerequisites(subject);
+
+                    if (isCompleted) {
+                        card.classList.add('completed');
+                    } else {
+                        if (arePrereqsMet) {
+                            card.classList.add('available');
+                        } else {
+                            card.classList.add('locked');
+                        }
+                    }
+
+                    card.innerHTML = `
+                        <div>
+                            <p class="subject-name">${subject.name}</p>
+                        </div>
+                        <div class="subject-details">
+                            <span>${subject.code}</span> | <span>${subject.credits} UCs</span>
+                        </div>
+                    `;
+
+                    card.addEventListener('click', () => toggleSubject(subject));
+                    semesterColumn.appendChild(card);
+                });
+                gridContainer.appendChild(semesterColumn);
+            }
+        }
+
+        function toggleSubject(subject) {
+            const arePrereqsMet = checkPrerequisites(subject);
+            if (!arePrereqsMet && !completedSubjects.has(subject.id)) {
+                return;
+            }
+
+            if (completedSubjects.has(subject.id)) {
+                completedSubjects.delete(subject.id);
+            } else {
+                completedSubjects.add(subject.id);
+            }
+            
+            renderGrid();
+        }
+
+        document.addEventListener('DOMContentLoaded', renderGrid());
+    </script>
+</body>
+</html>
